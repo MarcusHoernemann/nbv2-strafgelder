@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#080c14">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Dart Kasse">
-  <title>Dart Strafenkasse - Live Spielmodus</title>
+  <meta name="apple-mobile-web-app-title" content="NBV Kasse">
+  <title>NBV Strafkasse</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -41,8 +41,6 @@
   <!-- jsPDF & AutoTable for PDF Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-  <!-- Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -55,7 +53,7 @@
       user-select: none;
     }
 
-    /* Fast, tactile button press animation */
+    /* Fast tactile button press animation */
     .tap-btn {
       transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
     }
@@ -64,16 +62,7 @@
       filter: brightness(0.9);
     }
 
-    /* Golden 180 button pulse animation */
-    @keyframes goldPulse {
-      0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); border-color: rgba(251, 191, 36, 0.9); }
-      50% { box-shadow: 0 0 30px rgba(245, 158, 11, 0.75); border-color: rgba(253, 230, 138, 1); }
-    }
-    .glow-180 {
-      animation: goldPulse 2.4s infinite ease-in-out;
-    }
-
-    /* Ping animation for live indicator */
+    /* Live dot pulsing */
     @keyframes liveRing {
       0% { transform: scale(0.9); opacity: 0.9; }
       50% { transform: scale(1.3); opacity: 0.4; }
@@ -86,25 +75,25 @@
 </head>
 <body class="bg-board-dark text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-red-500 selection:text-white">
 
-  <header class="sticky top-0 z-30 bg-board-card/95 backdrop-blur-md border-b border-board-border px-4 py-3 flex items-center justify-between shadow-lg">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-600 via-amber-500 to-emerald-500 p-0.5 flex items-center justify-center shadow-md">
+  <!-- Header -->
+  <header class="sticky top-0 z-30 bg-board-card/95 backdrop-blur-md border-b border-board-border px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between shadow-lg">
+    <div class="flex items-center space-x-2.5 sm:space-x-3">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-red-600 via-amber-500 to-emerald-500 p-0.5 flex items-center justify-center shadow-md">
         <div class="w-full h-full bg-board-dark rounded-[14px] flex items-center justify-center">
-          <i data-lucide="target" class="w-5 h-5 text-amber-400"></i>
+          <i data-lucide="target" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
         </div>
       </div>
       <div>
-        <h1 class="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-1.5">
-          DART STRAFENKASSE
-          <span class="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-800/80 font-bold">LIVE</span>
+        <h1 class="text-sm sm:text-base font-black tracking-tight text-white leading-tight">
+          NBV STRAFKASSE
         </h1>
-        <p class="text-[11px] text-slate-400" id="session-header-subtitle">Spieltag läuft</p>
+        <p class="text-[10px] sm:text-[11px] text-slate-400 truncate max-w-[170px] sm:max-w-xs" id="session-header-subtitle">Spieltag läuft</p>
       </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="flex items-center space-x-2">
-      <button onclick="exportToPDF()" class="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-sm" title="Vollständige PDF exportieren">
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-1.5 sm:space-x-2">
+      <button onclick="exportToPDF()" class="px-2.5 sm:px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-sm" title="Vollständige PDF exportieren">
         <i data-lucide="file-down" class="w-4 h-4"></i>
         <span class="hidden sm:inline">PDF Export</span>
       </button>
@@ -116,44 +105,44 @@
   </header>
 
   <!-- DEDICATED LIVE GAME VIEW: STAYS OPEN PERMANENTLY AS LONG AS PLAYER IS PLAYING -->
-  <section id="view-active-game" class="hidden flex-1 max-w-4xl w-full mx-auto p-3 sm:p-4 md:p-6 flex flex-col space-y-4">
+  <section id="view-active-game" class="hidden flex-1 max-w-4xl w-full mx-auto p-2.5 sm:p-4 md:p-6 flex flex-col space-y-3 sm:space-y-4">
     
     <!-- Active Player Control Banner -->
-    <div class="bg-gradient-to-r from-red-950/80 via-board-card to-slate-900 border-2 border-red-500/50 rounded-3xl p-4 sm:p-5 shadow-2xl relative overflow-hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="bg-gradient-to-r from-red-950/80 via-board-card to-slate-900 border-2 border-red-500/50 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-2xl relative overflow-hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4">
         
         <!-- Left: Player Info -->
-        <div class="flex items-center gap-3.5">
-          <div class="w-14 h-14 rounded-2xl bg-board-dark border-2 border-red-500/70 flex items-center justify-center font-black text-2xl text-amber-400 shadow-inner">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-board-dark border-2 border-red-500/70 flex items-center justify-center font-black text-lg sm:text-xl text-amber-400 shadow-inner shrink-0">
             <span id="active-player-initial">?</span>
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 live-dot"></span>
-              <span class="text-[11px] font-black uppercase tracking-wider text-emerald-400">AM BOARD (SPIEL LÄUFT)</span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 live-dot shrink-0"></span>
+              <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-emerald-400">AM BOARD</span>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black text-white tracking-wide" id="active-player-name">Spieler</h2>
-            <p class="text-[11px] text-slate-400 mt-0.5">Tippe auf die Strafen – dieses Fenster schließt sich nicht!</p>
+            <h2 class="text-lg sm:text-2xl font-black text-white tracking-wide truncate" id="active-player-name">Spieler</h2>
+            <p class="text-[10px] text-slate-400 truncate">Tippen bucht sofort – Fenster bleibt offen</p>
           </div>
         </div>
 
-        <!-- Right: Current Player Sum & End Game Button -->
-        <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-board-border">
-          <div class="text-left sm:text-right">
-            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Strafen gesamt</div>
-            <div class="text-2xl sm:text-3xl font-black font-mono text-red-400" id="active-player-total">0,00 €</div>
+        <!-- Right: Current Player Sum & Buttons -->
+        <div class="flex items-center justify-between sm:justify-end gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-board-border">
+          <div class="text-left sm:text-right pr-1">
+            <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-bold">Strafen</div>
+            <div class="text-lg sm:text-2xl font-black font-mono text-red-400 leading-tight" id="active-player-total">0,00 €</div>
           </div>
 
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-1.5 shrink-0">
             <!-- Next Player Fast Switch -->
-            <button onclick="switchNextPlayer()" class="px-3 py-2.5 bg-board-dark hover:bg-slate-800 text-slate-200 border border-board-border rounded-2xl text-xs font-bold flex items-center gap-1.5 tap-btn" title="Direkt zum nächsten Spieler springen">
+            <button onclick="switchNextPlayer()" class="px-2.5 sm:px-3 py-2 bg-board-dark hover:bg-slate-800 text-slate-200 border border-board-border rounded-xl text-xs font-bold flex items-center gap-1 tap-btn" title="Direkt zum nächsten Spieler springen">
               <span>Nächster</span>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-amber-400"></i>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-400"></i>
             </button>
 
             <!-- Close/Finish Button -->
-            <button onclick="closeActiveGameView()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs sm:text-sm font-black flex items-center gap-1.5 tap-btn shadow-lg">
-              <i data-lucide="check" class="w-4 h-4"></i>
+            <button onclick="closeActiveGameView()" class="px-3 sm:px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 tap-btn shadow-lg">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
               <span>Fertig</span>
             </button>
           </div>
@@ -162,183 +151,179 @@
     </div>
 
     <!-- RAPID TAPPING PENALTY BUTTONS -->
-    <div class="space-y-3">
-      <div class="flex items-center justify-between px-1">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-          <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
-          Sofort-Strafen (1 Klick = Verbucht & bleibt offen)
+    <div class="space-y-2.5">
+      <div class="flex items-center justify-between px-0.5">
+        <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+          Sofort-Strafen
         </span>
-        <button onclick="undoActivePlayerLastPenalty()" class="text-xs font-semibold text-slate-400 hover:text-amber-400 tap-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-board-card border border-board-border">
-          <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-          <span>Letzte rückgängig</span>
+        <button onclick="undoActivePlayerLastPenalty()" class="text-[11px] font-semibold text-slate-400 hover:text-amber-400 tap-btn flex items-center gap-1 px-2.5 py-1 rounded-lg bg-board-card border border-board-border">
+          <i data-lucide="undo-2" class="w-3 h-3"></i>
+          <span>Rückgängig</span>
         </button>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+      <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
         
         <!-- Unter 36 Punkte (0,50 €) -->
-        <button onclick="liveBookPenalty(0.50, 'Unter 36 Punkte geworfen')" class="tap-btn p-4 sm:p-5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-2xl sm:rounded-3xl flex flex-col justify-between text-left shadow-lg">
+        <button onclick="liveBookPenalty(0.50, 'Unter 36 Punkte geworfen')" class="tap-btn p-2.5 sm:p-3.5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-xl sm:rounded-2xl flex flex-col justify-between text-left shadow-md">
           <div class="flex items-center justify-between w-full">
-            <span class="w-8 h-8 rounded-xl bg-red-500/20 text-red-400 font-black text-xs flex items-center justify-center">36</span>
-            <span class="font-mono font-black text-base sm:text-lg text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+0,50 €</span>
+            <span class="w-6 h-6 rounded-lg bg-red-500/20 text-red-400 font-black text-xs flex items-center justify-center">36</span>
+            <span class="font-mono font-black text-xs sm:text-sm text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+0,50 €</span>
           </div>
-          <div class="mt-3">
-            <div class="font-black text-sm sm:text-base text-white">Unter 36 Punkte</div>
-            <div class="text-[11px] text-slate-400">Fehlwurf / Ausrutscher</div>
+          <div class="mt-2">
+            <div class="font-black text-xs sm:text-sm text-white">&lt; 36 Punkte</div>
+            <div class="text-[10px] text-slate-400">Ausrutscher</div>
           </div>
         </button>
 
         <!-- Unter 11 Punkte (1,00 €) -->
-        <button onclick="liveBookPenalty(1.00, 'Unter 11 Punkte geworfen')" class="tap-btn p-4 sm:p-5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-2xl sm:rounded-3xl flex flex-col justify-between text-left shadow-lg">
+        <button onclick="liveBookPenalty(1.00, 'Unter 11 Punkte geworfen')" class="tap-btn p-2.5 sm:p-3.5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-xl sm:rounded-2xl flex flex-col justify-between text-left shadow-md">
           <div class="flex items-center justify-between w-full">
-            <span class="w-8 h-8 rounded-xl bg-red-500/20 text-red-400 font-black text-xs flex items-center justify-center">11</span>
-            <span class="font-mono font-black text-base sm:text-lg text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+1,00 €</span>
+            <span class="w-6 h-6 rounded-lg bg-red-500/20 text-red-400 font-black text-xs flex items-center justify-center">11</span>
+            <span class="font-mono font-black text-xs sm:text-sm text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+1,00 €</span>
           </div>
-          <div class="mt-3">
-            <div class="font-black text-sm sm:text-base text-white">Unter 11 Punkte</div>
-            <div class="text-[11px] text-slate-400">Klassischer Tiefpunkt</div>
+          <div class="mt-2">
+            <div class="font-black text-xs sm:text-sm text-white">&lt; 11 Punkte</div>
+            <div class="text-[10px] text-slate-400">Tiefpunkt</div>
           </div>
         </button>
 
         <!-- Lakritz werfen (1,00 €) -->
-        <button onclick="liveBookPenalty(1.00, 'Lakritz werfen')" class="tap-btn p-4 sm:p-5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-2xl sm:rounded-3xl flex flex-col justify-between text-left shadow-lg">
+        <button onclick="liveBookPenalty(1.00, 'Lakritz werfen')" class="tap-btn p-2.5 sm:p-3.5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-xl sm:rounded-2xl flex flex-col justify-between text-left shadow-md">
           <div class="flex items-center justify-between w-full">
-            <span class="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 font-black text-sm flex items-center justify-center">🍬</span>
-            <span class="font-mono font-black text-base sm:text-lg text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+1,00 €</span>
+            <span class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-black text-xs flex items-center justify-center">🍬</span>
+            <span class="font-mono font-black text-xs sm:text-sm text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+1,00 €</span>
           </div>
-          <div class="mt-3">
-            <div class="font-black text-sm sm:text-base text-white">Lakritz werfen</div>
-            <div class="text-[11px] text-slate-400">Schwarzes Außenfeld</div>
+          <div class="mt-2">
+            <div class="font-black text-xs sm:text-sm text-white">Lakritz werfen</div>
+            <div class="text-[10px] text-slate-400">Schwarzes Außenfeld</div>
           </div>
         </button>
 
         <!-- Mit Anbohlen ausmachen (2,00 €) -->
-        <button onclick="liveBookPenalty(2.00, 'Mit Anbohlen ausgemacht')" class="tap-btn p-4 sm:p-5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-2xl sm:rounded-3xl flex flex-col justify-between text-left shadow-lg">
+        <button onclick="liveBookPenalty(2.00, 'Mit Anbohlen ausgemacht')" class="tap-btn p-2.5 sm:p-3.5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-xl sm:rounded-2xl flex flex-col justify-between text-left shadow-md">
           <div class="flex items-center justify-between w-full">
-            <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-black text-sm flex items-center justify-center">🔨</span>
-            <span class="font-mono font-black text-base sm:text-lg text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+2,00 €</span>
+            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center">🔨</span>
+            <span class="font-mono font-black text-xs sm:text-sm text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+2,00 €</span>
           </div>
-          <div class="mt-3">
-            <div class="font-black text-sm sm:text-base text-white">Mit Anbohlen aus</div>
-            <div class="text-[11px] text-slate-400">Ausgemacht mit Anbohlen</div>
+          <div class="mt-2">
+            <div class="font-black text-xs sm:text-sm text-white">Anbohlen aus</div>
+            <div class="text-[10px] text-slate-400">Ausgemacht mit Anbohlen</div>
           </div>
         </button>
 
         <!-- Ohne Trikot spielen (2,50 €) -->
-        <button onclick="liveBookPenalty(2.50, 'Ohne Trikot spielen')" class="tap-btn p-4 sm:p-5 bg-board-card hover:bg-purple-950/40 border-2 border-board-border hover:border-purple-500/70 rounded-2xl sm:rounded-3xl flex flex-col justify-between text-left shadow-lg col-span-2 sm:col-span-2">
+        <button onclick="liveBookPenalty(2.50, 'Ohne Trikot spielen')" class="tap-btn p-2.5 sm:p-3.5 bg-board-card hover:bg-purple-950/40 border-2 border-board-border hover:border-purple-500/70 rounded-xl sm:rounded-2xl flex flex-col justify-between text-left shadow-md col-span-2">
           <div class="flex items-center justify-between w-full">
             <div class="flex items-center gap-2">
-              <span class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 font-black text-sm flex items-center justify-center">👕</span>
-              <span class="font-black text-sm sm:text-base text-white">Ohne Trikot spielen</span>
+              <span class="w-6 h-6 rounded-lg bg-purple-500/20 text-purple-400 font-black text-xs flex items-center justify-center">👕</span>
+              <span class="font-black text-xs sm:text-sm text-white">Ohne Trikot spielen</span>
             </div>
-            <span class="font-mono font-black text-base sm:text-lg text-red-400 bg-red-950/80 px-2.5 py-0.5 rounded-lg border border-red-800/60">+2,50 €</span>
+            <span class="font-mono font-black text-xs sm:text-sm text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+2,50 €</span>
           </div>
-          <div class="text-[11px] text-slate-400 mt-2">Vereinstrikot oder Dresscode vergessen</div>
+          <div class="text-[10px] text-slate-400 mt-1">Vereinstrikot / Dresscode vergessen</div>
         </button>
 
         <!-- Quick Custom Penalty Form -->
-        <div class="p-3 sm:p-4 bg-board-card border-2 border-board-border rounded-2xl sm:rounded-3xl flex flex-col justify-center col-span-2 sm:col-span-2 shadow-lg">
-          <span class="text-[11px] font-bold uppercase text-slate-400 mb-1.5">Freie / Sonstige Strafe</span>
-          <div class="flex gap-2">
-            <input type="text" id="live-custom-reason" placeholder="z. B. Bouncer, Handy..." class="flex-1 bg-board-dark border border-board-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500">
-            <input type="number" id="live-custom-amount" step="0.50" min="0.10" placeholder="€" class="w-20 bg-board-dark border border-board-border rounded-xl px-2 py-2 text-xs text-white text-center font-mono placeholder-slate-500 focus:outline-none focus:border-red-500">
-            <button onclick="liveBookCustomPenalty()" class="px-4 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold tap-btn">
+        <div class="p-2.5 bg-board-card border-2 border-board-border rounded-xl sm:rounded-2xl flex flex-col justify-center col-span-2 shadow-md">
+          <span class="text-[10px] font-bold uppercase text-slate-400 mb-1">Freie / Sonstige Strafe</span>
+          <div class="flex gap-1.5">
+            <input type="text" id="live-custom-reason" placeholder="z. B. Bouncer..." class="flex-1 min-w-0 bg-board-dark border border-board-border rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500">
+            <input type="number" id="live-custom-amount" step="0.50" min="0.10" placeholder="€" class="w-16 bg-board-dark border border-board-border rounded-lg px-2 py-1.5 text-xs text-white text-center font-mono placeholder-slate-500 focus:outline-none focus:border-red-500">
+            <button onclick="liveBookCustomPenalty()" class="px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold tap-btn shrink-0">
               Buchen
             </button>
           </div>
         </div>
       </div>
 
-      <!-- 180 / 171 / 162 Maximum Button -->
-      <button onclick="liveTrigger180ForActivePlayer()" class="glow-180 tap-btn w-full p-4 sm:p-5 bg-gradient-to-r from-amber-600 via-amber-500 to-red-600 hover:brightness-110 border-2 border-amber-300 rounded-2xl sm:rounded-3xl flex items-center justify-between text-white font-bold shadow-2xl">
-        <div class="flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-2xl bg-black/35 flex items-center justify-center shrink-0">
-            <i data-lucide="flame" class="w-7 h-7 text-yellow-200 fill-yellow-300"></i>
+      <!-- 180 / 171 / 162 Button: Sachliches Design ohne Puls/Glow-Effekt -->
+      <button onclick="liveTrigger180ForActivePlayer()" class="tap-btn w-full p-2.5 sm:p-3 bg-board-card hover:bg-amber-950/30 border-2 border-amber-500/60 rounded-xl sm:rounded-2xl flex items-center justify-between gap-2 text-white shadow-md text-left">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+            <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
           </div>
-          <div class="text-left">
-            <div class="text-base sm:text-xl font-black tracking-wide leading-tight">180 / 171 / 162 GEWORFEN!</div>
-            <div class="text-xs text-amber-100 font-medium">Alle anderen Spieler zahlen sofort automatisch je 1,00 €</div>
-          </div>
+          <span class="text-xs sm:text-sm font-black tracking-tight whitespace-nowrap">180 / 171 / 162</span>
         </div>
-        <span class="font-mono text-xs sm:text-sm font-black bg-black/40 px-3 py-1.5 rounded-xl border border-white/20 whitespace-nowrap ml-2">
-          Alle +1,00 €
-        </span>
+        <div class="shrink-0 flex items-center gap-1.5 bg-board-dark px-2 py-1 rounded-lg border border-board-border">
+          <span class="font-normal text-[10px] text-amber-200/90">Alle</span>
+          <span class="font-mono font-black text-xs sm:text-sm text-amber-400">+1,00 €</span>
+        </div>
       </button>
     </div>
 
     <!-- Live Game Log for this specific active player -->
-    <div class="bg-board-card border border-board-border rounded-2xl p-4 flex-1">
-      <div class="flex items-center justify-between mb-2 pb-2 border-b border-board-border">
-        <span class="text-xs font-bold uppercase text-slate-400">Verbuchte Strafen in diesem Spiel</span>
-        <span class="text-xs font-mono font-bold text-amber-400" id="active-game-count">0 Strafen</span>
+    <div class="bg-board-card border border-board-border rounded-xl sm:rounded-2xl p-3 flex-1">
+      <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-board-border">
+        <span class="text-[11px] font-bold uppercase text-slate-400">Verbuchte Strafen</span>
+        <span class="text-[11px] font-mono font-bold text-amber-400" id="active-game-count">0 Strafen</span>
       </div>
-      <div id="active-player-history" class="space-y-1.5 max-h-44 overflow-y-auto text-xs pr-1">
+      <div id="active-player-history" class="space-y-1.5 max-h-40 overflow-y-auto text-xs pr-1">
         <!-- Rendered dynamically -->
       </div>
     </div>
   </section>
 
   <!-- MAIN DASHBOARD: SHOWN WHEN NO PLAYER IS ACTIVELY CALLED -->
-  <main id="view-dashboard" class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
-
-    <!-- KPI / Pot Summary Strip -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+  <main id="view-dashboard" class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-5 space-y-4">
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5">
       
       <!-- Total Pot -->
-      <div class="bg-board-card border border-board-border rounded-2xl p-4 flex flex-col justify-between shadow-md">
+      <div class="bg-board-card border border-board-border rounded-2xl p-3.5 flex flex-col justify-between shadow-md">
         <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider">
           <span>Gesamttopf</span>
           <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i>
         </div>
-        <div class="mt-2">
-          <span class="text-2xl sm:text-3xl font-black text-amber-400 font-mono" id="stat-total-pot">0,00 €</span>
+        <div class="mt-1.5">
+          <span class="text-xl sm:text-2xl font-black text-amber-400 font-mono" id="stat-total-pot">0,00 €</span>
         </div>
-        <div class="text-[11px] text-slate-400 mt-1" id="stat-total-count">0 Strafen verbucht</div>
+        <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1" id="stat-total-count">0 Strafen verbucht</div>
       </div>
 
       <!-- Active Players -->
-      <div class="bg-board-card border border-board-border rounded-2xl p-4 flex flex-col justify-between shadow-md">
+      <div class="bg-board-card border border-board-border rounded-2xl p-3.5 flex flex-col justify-between shadow-md">
         <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider">
           <span>Spieler</span>
           <i data-lucide="users" class="w-4 h-4 text-sky-400"></i>
         </div>
-        <div class="mt-2">
-          <span class="text-2xl sm:text-3xl font-black text-white font-mono" id="stat-player-count">0</span>
+        <div class="mt-1.5">
+          <span class="text-xl sm:text-2xl font-black text-white font-mono" id="stat-player-count">0</span>
         </div>
-        <div class="text-[11px] text-slate-400 mt-1" id="stat-paid-count">0 bezahlt</div>
+        <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1" id="stat-paid-count">0 bezahlt</div>
       </div>
 
       <!-- Highest Penalty Payer -->
-      <div class="bg-board-card border border-board-border rounded-2xl p-4 flex flex-col justify-between shadow-md">
+      <div class="bg-board-card border border-board-border rounded-2xl p-3.5 flex flex-col justify-between shadow-md">
         <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider">
           <span>Strafenkönig</span>
           <i data-lucide="crown" class="w-4 h-4 text-yellow-500"></i>
         </div>
-        <div class="mt-2 truncate">
-          <span class="text-lg sm:text-xl font-bold text-red-400 truncate block" id="stat-king-name">-</span>
+        <div class="mt-1.5 truncate">
+          <span class="text-base sm:text-lg font-bold text-red-400 truncate block" id="stat-king-name">-</span>
         </div>
-        <div class="text-[11px] text-slate-400 mt-1 font-mono" id="stat-king-amount">0,00 €</div>
+        <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1 font-mono" id="stat-king-amount">0,00 €</div>
       </div>
 
       <!-- Quick Add Player -->
-      <div onclick="openAddPlayerModal()" class="bg-board-card/60 hover:bg-board-card border border-board-border/80 border-dashed rounded-2xl p-4 flex flex-col justify-center items-center gap-1.5 text-center transition cursor-pointer active:scale-95 shadow-md">
-        <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-          <i data-lucide="user-plus" class="w-5 h-5"></i>
+      <div onclick="openAddPlayerModal()" class="bg-board-card/60 hover:bg-board-card border border-board-border/80 border-dashed rounded-2xl p-3.5 flex flex-col justify-center items-center gap-1 text-center transition cursor-pointer active:scale-95 shadow-md">
+        <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
         </div>
         <span class="text-xs font-bold text-emerald-400">Neuer Spieler</span>
       </div>
     </section>
 
     <!-- Catalog Reference Bar -->
-    <section class="bg-board-card border border-board-border rounded-2xl p-3.5 sm:p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-2.5">
-        <div class="flex items-center gap-2">
-          <i data-lucide="receipt" class="w-4 h-4 text-red-400"></i>
+    <section class="bg-board-card border border-board-border rounded-2xl p-3 sm:p-3.5 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="receipt" class="w-3.5 h-3.5 text-red-400"></i>
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Gültiger Strafenkatalog</h2>
         </div>
-        <span class="text-[11px] text-slate-400">1-Klick beim Wurf verbuchen</span>
+        <span class="text-[10px] sm:text-[11px] text-slate-400">1-Klick beim Wurf</span>
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 text-xs">
         <div class="bg-board-dark p-2 rounded-xl border border-board-border flex justify-between items-center">
           <span class="text-slate-300">&lt; 36 Punkte</span>
           <span class="text-red-400 font-bold font-mono">0,50 €</span>
@@ -352,102 +337,93 @@
           <span class="text-red-400 font-bold font-mono">1,00 €</span>
         </div>
         <div class="bg-board-dark p-2 rounded-xl border border-board-border flex justify-between items-center">
-          <span class="text-slate-300">Mit Anbohlen aus</span>
+          <span class="text-slate-300">Mit Anbohlen</span>
           <span class="text-red-400 font-bold font-mono">2,00 €</span>
         </div>
-        <div class="bg-board-dark p-2 rounded-xl border border-board-border flex justify-between items-center">
+        <div class="bg-board-dark p-2 rounded-xl border border-board-border flex justify-between items-center col-span-2 sm:col-span-1">
           <span class="text-slate-300">Ohne Trikot</span>
           <span class="text-red-400 font-bold font-mono">2,50 €</span>
         </div>
-        <div class="bg-amber-950/30 p-2 rounded-xl border border-amber-900/60 flex justify-between items-center">
-          <span class="text-amber-300">180/171/162</span>
-          <span class="text-amber-400 font-bold font-mono">Alle 1,00 €</span>
+      </div>
+      
+      <!-- 180 / 171 / 162 Clean Row -->
+      <div class="mt-1.5 bg-gradient-to-r from-amber-950/60 via-board-dark to-amber-950/40 p-2 rounded-xl border border-amber-500/40 flex items-center justify-between text-xs">
+        <span class="text-white font-bold tracking-tight">180 / 171 / 162</span>
+        <div class="text-amber-300 font-mono text-xs flex items-center gap-1.5 shrink-0">
+          <span class="font-normal text-[10px] text-amber-200/80">Alle</span>
+          <span class="font-bold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-700/60">+1,00 €</span>
         </div>
       </div>
     </section>
 
     <!-- Players Section -->
     <section>
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center justify-between mb-2.5">
         <div class="flex items-center gap-2">
-          <h2 class="text-base sm:text-lg font-black text-white">Spieler am Spieltag</h2>
-          <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono font-bold" id="player-badge-count">0</span>
+          <h2 class="text-sm sm:text-base font-black text-white">Spieler am Spieltag</h2>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono font-bold" id="player-badge-count">0</span>
         </div>
-        <button onclick="openAddPlayerModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-md">
-          <i data-lucide="plus" class="w-4 h-4"></i>
+        <button onclick="openAddPlayerModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-md">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
           Spieler hinzufügen
         </button>
       </div>
 
       <!-- Player Cards Container -->
-      <div id="players-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div id="players-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5">
         <!-- Rendered dynamically -->
       </div>
 
       <!-- Empty State -->
-      <div id="empty-state" class="hidden py-14 px-4 text-center border-2 border-dashed border-board-border rounded-3xl bg-board-card/40">
-        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-board-border/60 flex items-center justify-center text-slate-400">
-          <i data-lucide="user-x" class="w-7 h-7"></i>
+      <div id="empty-state" class="hidden py-10 px-4 text-center border-2 border-dashed border-board-border rounded-2xl bg-board-card/40">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-2xl bg-board-border/60 flex items-center justify-center text-slate-400">
+          <i data-lucide="user-x" class="w-6 h-6"></i>
         </div>
         <h3 class="text-sm font-bold text-white">Noch keine Spieler eingetragen</h3>
-        <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Lege eure Spieler an, um sie ans Board zu rufen und Strafen zu erfassen.</p>
-        <button onclick="openAddPlayerModal()" class="mt-4 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition inline-flex items-center gap-2 tap-btn shadow-lg">
+        <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Trage eure Spieler ein, um sie ans Board zu rufen.</p>
+        <button onclick="openAddPlayerModal()" class="mt-3 px-3.5 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition inline-flex items-center gap-1.5 tap-btn shadow-lg">
           <i data-lucide="user-plus" class="w-4 h-4"></i>
-          Ersten Spieler anlegen
+          Spieler anlegen
         </button>
       </div>
     </section>
 
     <!-- Global Audit History Strip -->
-    <section class="bg-board-card border border-board-border rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-3 pb-2 border-b border-board-border">
-        <div class="flex items-center gap-2">
-          <i data-lucide="history" class="w-4 h-4 text-slate-400"></i>
+    <section class="bg-board-card border border-board-border rounded-2xl p-3.5 shadow-sm">
+      <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-board-border">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="history" class="w-3.5 h-3.5 text-slate-400"></i>
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Buchungsprotokoll</h3>
         </div>
         <button onclick="clearHistoryConfirm()" class="text-[11px] text-slate-400 hover:text-red-400 transition flex items-center gap-1">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <i data-lucide="trash-2" class="w-3 h-3"></i>
           Historie leeren
         </button>
       </div>
 
-      <div id="history-list" class="divide-y divide-board-border/70 max-h-52 overflow-y-auto text-xs pr-1">
+      <div id="history-list" class="divide-y divide-board-border/70 max-h-48 overflow-y-auto text-xs pr-1">
         <!-- Rendered dynamically -->
       </div>
     </section>
   </main>
 
-  <!-- Modal: Add New Player -->
+  <!-- Modal: Add New Player (Clean: only name, no shirt question) -->
   <div id="add-player-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-board-card border border-board-border rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
-      <div class="p-5 border-b border-board-border flex items-center justify-between">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i data-lucide="user-plus" class="w-5 h-5 text-emerald-400"></i>
+      <div class="p-4 sm:p-5 border-b border-board-border flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400"></i>
           Neuen Spieler anlegen
         </h3>
         <button onclick="closeModal('add-player-modal')" class="p-1.5 text-slate-400 hover:text-white rounded-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
+          <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
       </div>
 
-      <form onsubmit="handleCreatePlayer(event)" class="p-5 space-y-4">
+      <form onsubmit="handleCreatePlayer(event)" class="p-4 sm:p-5 space-y-4">
         <div>
-          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1" for="player-name-input">Spielername / Spitzname</label>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5" for="player-name-input">Spielername / Spitzname</label>
           <input type="text" id="player-name-input" required placeholder="z. B. Dennis, Marcel, Marco..." class="w-full bg-board-dark border border-board-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Trikot zum Start</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center gap-2 p-2.5 bg-board-dark border border-board-border rounded-xl cursor-pointer hover:border-slate-600">
-              <input type="radio" name="start-shirt" value="mit" checked class="text-emerald-500 focus:ring-0">
-              <span class="text-xs text-slate-200">Mit Trikot</span>
-            </label>
-            <label class="flex items-center gap-2 p-2.5 bg-board-dark border border-board-border rounded-xl cursor-pointer hover:border-slate-600">
-              <input type="radio" name="start-shirt" value="ohne" class="text-red-500 focus:ring-0">
-              <span class="text-xs text-slate-200">Ohne (+2,50 €)</span>
-            </label>
-          </div>
         </div>
 
         <div class="flex gap-2 pt-2">
@@ -465,40 +441,37 @@
   <!-- Modal: Settings & Session Reset -->
   <div id="settings-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-board-card border border-board-border rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-      <div class="p-5 border-b border-board-border flex items-center justify-between">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i data-lucide="sliders" class="w-5 h-5 text-slate-300"></i>
+      <div class="p-4 sm:p-5 border-b border-board-border flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-300"></i>
           Session Einstellungen
         </h3>
         <button onclick="closeModal('settings-modal')" class="p-1.5 text-slate-400 hover:text-white rounded-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
+          <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
       </div>
 
-      <div class="p-5 space-y-4 text-xs">
+      <div class="p-4 sm:p-5 space-y-4 text-xs">
         <div>
           <label class="block font-semibold uppercase text-slate-400 mb-1">Spieltag Name</label>
-          <input type="text" id="session-title-input" class="w-full bg-board-dark border border-board-border rounded-xl px-3 py-2 text-sm text-white" placeholder="z. B. Dartabend Kneipe / Liga-Spieltag">
+          <input type="text" id="session-title-input" class="w-full bg-board-dark border border-board-border rounded-xl px-3 py-2 text-sm text-white" placeholder="z. B. Dartabend / Ligaspiel">
         </div>
 
         <div class="pt-2 border-t border-board-border space-y-2">
-          <button onclick="loadSampleMatch()" class="w-full py-2.5 px-4 bg-board-dark hover:bg-slate-800 border border-board-border text-slate-300 rounded-xl font-medium flex items-center justify-between transition">
-            <span>Beispiel-Spieltag laden</span>
-            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-          </button>
-
-          <button onclick="resetAllFinesOnly()" class="w-full py-2.5 px-4 bg-board-dark hover:bg-slate-800 border border-board-border text-amber-400 rounded-xl font-medium flex items-center justify-between transition">
-            <span>Alle Strafen auf 0,00 € setzen</span>
+          <!-- Neuer Spieltag: Strafen auf 0, Spieler bleiben erhalten -->
+          <button onclick="resetAllFinesOnly()" class="w-full py-2.5 px-3.5 bg-board-dark hover:bg-slate-800 border border-board-border text-amber-400 rounded-xl font-medium flex items-center justify-between transition">
+            <span>Neuer Spieltag (Strafen auf 0, Spieler bleiben)</span>
             <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
           </button>
 
-          <button onclick="fullResetConfirm()" class="w-full py-2.5 px-4 bg-red-950/30 hover:bg-red-900/50 border border-red-900/50 text-red-400 rounded-xl font-medium flex items-center justify-between transition">
-            <span>Neuer Spieltag (Alles löschen)</span>
-            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <!-- Alles löschen inkl. Spieler -->
+          <button onclick="fullResetConfirm()" class="w-full py-2.5 px-3.5 bg-red-950/30 hover:bg-red-900/50 border border-red-900/50 text-red-400 rounded-xl font-medium flex items-center justify-between transition">
+            <span>Alle Spieler &amp; Daten löschen</span>
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
 
-        <div class="pt-3 border-t border-board-border flex justify-end">
+        <div class="pt-2 border-t border-board-border flex justify-end">
           <button onclick="saveSessionSettings()" class="px-4 py-2 bg-slate-200 hover:bg-white text-slate-950 rounded-xl font-bold">
             Speichern
           </button>
@@ -516,7 +489,7 @@
   </div>
 
   <script>
-    const APP_STORAGE_KEY = 'dart_strafenkasse_live_v3';
+    const APP_STORAGE_KEY = 'dart_strafenkasse_live_v4';
 
     let appData = {
       sessionTitle: 'Dart Spieltag',
@@ -526,51 +499,6 @@
     };
 
     let activePlayerId = null;
-
-    // Web Audio Sound Generator for physical acoustic feedback
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playSound(type) {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-
-        if (type === 'coin') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(987.77, now);
-          osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.08);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-          osc.start(now);
-          osc.stop(now + 0.22);
-        } else if (type === 'cheer') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(523.25, now);
-          osc.frequency.setValueAtTime(659.25, now + 0.1);
-          osc.frequency.setValueAtTime(783.99, now + 0.2);
-          osc.frequency.setValueAtTime(1046.50, now + 0.3);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
-          osc.start(now);
-          osc.stop(now + 0.7);
-        } else if (type === 'tap') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(440, now);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
-          osc.start(now);
-          osc.stop(now + 0.06);
-        }
-      } catch (e) {
-        console.error('Audio play error', e);
-      }
-    }
 
     function loadData() {
       const stored = localStorage.getItem(APP_STORAGE_KEY);
@@ -620,7 +548,7 @@
       setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
         toast.classList.add('translate-y-20', 'opacity-0');
-      }, 2200);
+      }, 2000);
     }
 
     // OPENS THE DEDICATED LIVE SCORING SCREEN (STAYS OPEN PERMANENTLY)
@@ -641,7 +569,6 @@
       document.getElementById('view-dashboard').classList.add('hidden');
       document.getElementById('view-active-game').classList.remove('hidden');
 
-      playSound('tap');
       lucide.createIcons();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -651,7 +578,6 @@
       document.getElementById('view-active-game').classList.add('hidden');
       document.getElementById('view-dashboard').classList.remove('hidden');
       renderAll();
-      playSound('tap');
     }
 
     function switchNextPlayer() {
@@ -691,13 +617,12 @@
         time: timeStr
       });
 
-      playSound('coin');
       saveData();
 
       // Update live numbers directly on screen without leaving
       document.getElementById('active-player-total').innerText = player.total.toFixed(2).replace('.', ',') + ' €';
       renderActivePlayerHistory();
-      showToast(`+${amount.toFixed(2).replace('.', ',')} € gebucht (${reason})`);
+      showToast(`+${amount.toFixed(2).replace('.', ',')} € gebucht`);
     }
 
     function liveBookCustomPenalty() {
@@ -707,7 +632,7 @@
       const amount = parseFloat(amountInput.value);
 
       if (isNaN(amount) || amount <= 0) {
-        showToast('Bitte gültigen Betrag eingeben!', true);
+        showToast('Bitte Betrag eingeben!', true);
         return;
       }
 
@@ -736,11 +661,10 @@
         time: timeStr
       });
 
-      playSound('tap');
       saveData();
       document.getElementById('active-player-total').innerText = player.total.toFixed(2).replace('.', ',') + ' €';
       renderActivePlayerHistory();
-      showToast(`Storno: ${lastPen.reason} (-${lastPen.amount.toFixed(2).replace('.', ',')} €)`);
+      showToast(`Storno: -${lastPen.amount.toFixed(2).replace('.', ',')} €`);
     }
 
     function liveTrigger180ForActivePlayer() {
@@ -749,7 +673,7 @@
       if (!scorer) return;
 
       if (appData.players.length < 2) {
-        showToast('Mindestens 2 Spieler erforderlich für 180er-Regel!', true);
+        showToast('Mindestens 2 Spieler erforderlich!', true);
         return;
       }
 
@@ -780,16 +704,8 @@
         }
       });
 
-      // Fanfare & Confetti
-      playSound('cheer');
-      confetti({
-        particleCount: 160,
-        spread: 100,
-        origin: { y: 0.6 }
-      });
-
       saveData();
-      showToast(`🔥 MAXIMUM! Alle anderen ${otherCount} Spieler zahlen 1,00 €!`);
+      showToast(`180/171/162 gebucht: Alle anderen +1,00 €`);
     }
 
     function renderActivePlayerHistory() {
@@ -807,7 +723,6 @@
 
       countDisplay.innerText = `${player.penalties.length} Strafen (${player.total.toFixed(2).replace('.', ',')} €)`;
 
-      // Reverse list to see newest at top
       [...player.penalties].reverse().forEach(p => {
         const item = document.createElement('div');
         item.className = 'py-1.5 px-2 bg-board-dark/80 rounded-lg flex items-center justify-between border border-board-border/60';
@@ -866,7 +781,7 @@
 
       appData.players.forEach(player => {
         const card = document.createElement('div');
-        card.className = `bg-board-card border ${player.paid ? 'border-emerald-800/70 bg-emerald-950/10' : 'border-board-border'} rounded-2xl p-4 flex flex-col justify-between shadow-lg transition hover:border-slate-600`;
+        card.className = `bg-board-card border ${player.paid ? 'border-emerald-800/70 bg-emerald-950/10' : 'border-board-border'} rounded-2xl p-3.5 flex flex-col justify-between shadow-lg transition hover:border-slate-600`;
 
         const penaltyCount = player.penalties ? player.penalties.length : 0;
 
@@ -874,12 +789,12 @@
           <div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-xl bg-board-dark border border-board-border flex items-center justify-center font-black text-base text-slate-200">
+                <div class="w-9 h-9 rounded-xl bg-board-dark border border-board-border flex items-center justify-center font-black text-sm text-slate-200">
                   ${player.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h3 class="font-bold text-white text-base leading-tight">${escapeHtml(player.name)}</h3>
-                  <span class="text-[11px] text-slate-400 font-mono">${penaltyCount} Vergehen</span>
+                  <h3 class="font-bold text-white text-sm sm:text-base leading-tight">${escapeHtml(player.name)}</h3>
+                  <span class="text-[10px] sm:text-[11px] text-slate-400 font-mono">${penaltyCount} Strafen</span>
                 </div>
               </div>
 
@@ -891,23 +806,23 @@
             </div>
 
             <!-- Amount Display -->
-            <div class="mt-3 p-3 bg-board-dark rounded-xl border border-board-border flex items-center justify-between">
+            <div class="mt-2.5 p-2.5 bg-board-dark rounded-xl border border-board-border flex items-center justify-between">
               <span class="text-xs text-slate-400 uppercase font-medium">Strafbetrag:</span>
-              <span class="text-xl font-black font-mono ${player.total > 0 ? 'text-red-400' : 'text-emerald-400'}">
+              <span class="text-lg sm:text-xl font-black font-mono ${player.total > 0 ? 'text-red-400' : 'text-emerald-400'}">
                 ${player.total.toFixed(2).replace('.', ',')} €
               </span>
             </div>
           </div>
 
           <!-- Actions -->
-          <div class="mt-4 pt-3 border-t border-board-border flex items-center gap-2">
+          <div class="mt-3 pt-2.5 border-t border-board-border flex items-center gap-2">
             <!-- BIG CALL TO BOARD BUTTON: OPENS DEDICATED LIVE SCORING SCREEN -->
-            <button onclick="openPlayerGame('${player.id}')" class="flex-1 py-2.5 px-3 bg-red-600 hover:bg-red-500 active:scale-95 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 transition shadow-md tap-btn">
-              <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+            <button onclick="openPlayerGame('${player.id}')" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 active:scale-95 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition shadow-md tap-btn">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
               Spieler aufrufen
             </button>
-            <button onclick="deletePlayerConfirm('${player.id}')" title="Spieler entfernen" class="p-2.5 bg-board-dark hover:bg-red-950/60 hover:text-red-400 text-slate-400 border border-board-border rounded-xl text-xs transition active:scale-95">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <button onclick="deletePlayerConfirm('${player.id}')" title="Spieler entfernen" class="p-2 bg-board-dark hover:bg-red-950/60 hover:text-red-400 text-slate-400 border border-board-border rounded-xl text-xs transition active:scale-95">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </div>
         `;
@@ -920,21 +835,21 @@
       container.innerHTML = '';
 
       if (!appData.history || appData.history.length === 0) {
-        container.innerHTML = '<div class="py-5 text-center text-xs text-slate-500">Noch keine Buchungen erfasst.</div>';
+        container.innerHTML = '<div class="py-4 text-center text-xs text-slate-500">Noch keine Buchungen erfasst.</div>';
         return;
       }
 
       const recent = [...appData.history].reverse().slice(0, 25);
       recent.forEach(item => {
         const row = document.createElement('div');
-        row.className = 'py-2 flex items-center justify-between text-xs hover:bg-slate-900/50 px-2 rounded-lg transition';
+        row.className = 'py-1.5 flex items-center justify-between text-xs hover:bg-slate-900/50 px-1.5 rounded-lg transition';
         row.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="text-slate-500 font-mono text-[10px]">${item.time || ''}</span>
-            <span class="font-bold text-white">${escapeHtml(item.playerName)}</span>
-            <span class="text-slate-400 truncate max-w-[160px]">• ${escapeHtml(item.reason)}</span>
+          <div class="flex items-center gap-2 min-w-0 pr-2">
+            <span class="text-slate-500 font-mono text-[10px] shrink-0">${item.time || ''}</span>
+            <span class="font-bold text-white shrink-0">${escapeHtml(item.playerName)}</span>
+            <span class="text-slate-400 truncate text-[11px]">• ${escapeHtml(item.reason)}</span>
           </div>
-          <span class="font-mono font-bold ${item.amount < 0 ? 'text-emerald-400' : 'text-red-400'}">
+          <span class="font-mono font-bold shrink-0 ${item.amount < 0 ? 'text-emerald-400' : 'text-red-400'}">
             ${item.amount > 0 ? '+' : ''}${item.amount.toFixed(2).replace('.', ',')} €
           </span>
         `;
@@ -946,7 +861,6 @@
       e.preventDefault();
       const nameInput = document.getElementById('player-name-input');
       const name = nameInput.value.trim();
-      const shirtStatus = document.querySelector('input[name="start-shirt"]:checked').value;
 
       if (!name) return;
 
@@ -959,29 +873,10 @@
         penalties: []
       };
 
-      if (shirtStatus === 'ohne') {
-        newPlayer.total = 2.50;
-        newPlayer.penalties.push({
-          id: 'pen_init_' + Date.now(),
-          amount: 2.50,
-          reason: 'Ohne Trikot spielen',
-          timestamp: new Date().toISOString()
-        });
-        const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-        appData.history.push({
-          playerId: newId,
-          playerName: name,
-          amount: 2.50,
-          reason: 'Ohne Trikot spielen',
-          time: timeStr
-        });
-      }
-
       appData.players.push(newPlayer);
       saveData();
       renderAll();
       closeModal('add-player-modal');
-      playSound('coin');
       showToast(`Spieler "${name}" angelegt!`);
 
       // Immediately open live screen for this player
@@ -995,7 +890,6 @@
       player.paid = !player.paid;
       saveData();
       renderAll();
-      playSound('tap');
       showToast(`${player.name}: ${player.paid ? 'Als BEZAHLT markiert' : 'Als OFFEN markiert'}`);
     }
 
@@ -1006,7 +900,7 @@
       modal.id = 'inline-confirm-modal';
       modal.className = 'fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4';
       modal.innerHTML = `
-        <div class="bg-board-card border border-board-border rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+        <div class="bg-board-card border border-board-border rounded-2xl max-w-sm w-full p-4 sm:p-5 space-y-4 shadow-2xl">
           <p class="text-sm font-semibold text-white">${escapeHtml(message)}</p>
           <div class="flex gap-2 justify-end">
             <button onclick="document.getElementById('inline-confirm-modal').remove()" class="px-3 py-1.5 bg-board-dark text-slate-300 rounded-xl text-xs font-semibold">Abbrechen</button>
@@ -1039,7 +933,7 @@
     }
 
     function resetAllFinesOnly() {
-      showConfirmationModal('Alle Strafen auf 0,00 € setzen? Die Spieler bleiben erhalten.', () => {
+      showConfirmationModal('Neuen Spieltag starten? Alle Strafen werden auf 0,00 € gesetzt, die Spieler bleiben erhalten.', () => {
         appData.players.forEach(p => {
           p.total = 0;
           p.paid = false;
@@ -1049,60 +943,19 @@
         saveData();
         renderAll();
         closeModal('settings-modal');
-        showToast('Alle Strafen zurückgesetzt.');
+        showToast('Neuer Spieltag gestartet! (Spieler behalten)');
       });
     }
 
     function fullResetConfirm() {
-      showConfirmationModal('Komplett neuen Spieltag starten? Alle Spieler und Buchungen werden gelöscht.', () => {
+      showConfirmationModal('Alle Daten & Spieler unwiderruflich löschen?', () => {
         appData.players = [];
         appData.history = [];
         saveData();
         renderAll();
         closeModal('settings-modal');
-        showToast('Neuer Spieltag gestartet.');
+        showToast('Alle Daten gelöscht.');
       });
-    }
-
-    function loadSampleMatch() {
-      appData.players = [
-        {
-          id: 'p_1',
-          name: 'Dennis',
-          total: 3.50,
-          paid: false,
-          penalties: [
-            { id: '1', amount: 0.50, reason: 'Unter 36 Punkte geworfen' },
-            { id: '2', amount: 1.00, reason: 'Lakritz werfen' },
-            { id: '3', amount: 2.00, reason: 'Mit Anbohlen ausgemacht' }
-          ]
-        },
-        {
-          id: 'p_2',
-          name: 'Marco',
-          total: 4.50,
-          paid: false,
-          penalties: [
-            { id: '4', amount: 1.00, reason: 'Unter 11 Punkte geworfen' },
-            { id: '5', amount: 2.50, reason: 'Ohne Trikot spielen' },
-            { id: '6', amount: 1.00, reason: '180er-Strafe (Stefan traf Maximum!)' }
-          ]
-        },
-        {
-          id: 'p_3',
-          name: 'Stefan',
-          total: 1.50,
-          paid: true,
-          penalties: [
-            { id: '7', amount: 0.50, reason: 'Unter 36 Punkte geworfen' },
-            { id: '8', amount: 1.00, reason: 'Lakritz werfen' }
-          ]
-        }
-      ];
-      saveData();
-      renderAll();
-      closeModal('settings-modal');
-      showToast('Beispiel-Spieltag geladen!');
     }
 
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
@@ -1146,7 +999,7 @@
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(22);
-      doc.text("DART STRAFENKASSE", 14, 20);
+      doc.text("NBV STRAFKASSE", 14, 20);
 
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
@@ -1180,7 +1033,7 @@
 
       doc.autoTable({
         startY: 50,
-        head: [['#', 'Spieler', 'Anzahl Vergehen', 'Status', 'Gesamtbetrag']],
+        head: [['#', 'Spieler', 'Anzahl Strafen', 'Status', 'Gesamtbetrag']],
         body: tableRows,
         theme: 'striped',
         headStyles: { fillColor: [220, 38, 38], textColor: 255, fontStyle: 'bold' },
@@ -1243,7 +1096,7 @@
 
       doc.autoTable({
         startY: currentY,
-        head: [['Regel / Vergehen', 'Strafe']],
+        head: [['Regel / Strafe', 'Betrag']],
         body: [
           ['Unter 36 Punkte werfen', '0,50 €'],
           ['Unter 11 Punkte werfen', '1,00 €'],
@@ -1270,17 +1123,16 @@
         doc.text("Unterschrift Mannschaftsführer", 120, footerY + 15);
       }
 
-      const filename = `Dart_Strafenkasse_${today.replace(/\./g, '-')}.pdf`;
+      const filename = `NBV_Strafkasse_${today.replace(/\./g, '-')}.pdf`;
       doc.save(filename);
-      playSound('cheer');
-      showToast(`PDF "${filename}" gespeichert!`);
+      showToast(`PDF gespeichert!`);
     }
 
     (function registerPwaManifest() {
       const manifest = {
-        name: "Dart Strafenkasse",
-        short_name: "Dart Kasse",
-        description: "Live PWA zur Abrechnung von Dart-Strafen",
+        name: "NBV Strafkasse",
+        short_name: "NBV Kasse",
+        description: "PWA zur Abrechnung von Dart-Strafen",
         start_url: window.location.href,
         display: "standalone",
         background_color: "#080c14",
