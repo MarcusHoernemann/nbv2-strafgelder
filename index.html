@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-title" content="NBV Kasse">
   <title>NBV Strafkasse</title>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lokale Bibliotheken für vollständige Offline-Nutzung -->
+  <script src="./lib/tailwind.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -36,11 +36,11 @@
     }
   </script>
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- jsPDF & AutoTable for PDF Export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <!-- Lucide Icons (Lokal) -->
+  <script src="./lib/lucide.min.js"></script>
+  <!-- jsPDF & AutoTable (Lokal) -->
+  <script src="./lib/jspdf.umd.min.js"></script>
+  <script src="./lib/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -1146,6 +1146,15 @@
       linkTag.href = manifestUrl;
       document.head.appendChild(linkTag);
     })();
+
+    // Service Worker Registrierung für Offline-Support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('Service Worker erfolgreich registriert'))
+          .catch(err => console.error('Service Worker Fehler:', err));
+      });
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
