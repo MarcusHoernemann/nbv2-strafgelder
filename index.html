@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="NBV Kasse">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./logo.png">
+  <link rel="apple-touch-icon" href="./logo.png">
   <title>NBV Strafkasse</title>
 
   <!-- Lokale Bibliotheken für vollständige Offline-Nutzung -->
@@ -78,7 +81,7 @@
   <!-- Header -->
   <header class="sticky top-0 z-30 bg-board-card/95 backdrop-blur-md border-b border-board-border px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between shadow-lg">
     <div class="flex items-center space-x-2.5 sm:space-x-3">
-      <img src="logo.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover shrink-0 shadow-md">
+      <img src="./logo.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover shrink-0 shadow-md">
       <div>
         <h1 class="text-sm sm:text-base font-black tracking-tight text-white leading-tight">
           NBV STRAFKASSE
@@ -1106,26 +1109,7 @@
       showToast(`PDF gespeichert!`);
     }
 
-    (function registerPwaManifest() {
-      const manifest = {
-        name: "NBV Strafkasse",
-        short_name: "NBV Kasse",
-        description: "PWA zur Abrechnung von Dart-Strafen",
-        start_url: window.location.href,
-        display: "standalone",
-        background_color: "#080c14",
-        theme_color: "#080c14"
-      };
-
-      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-      const manifestUrl = URL.createObjectURL(manifestBlob);
-      const linkTag = document.createElement('link');
-      linkTag.rel = 'manifest';
-      linkTag.href = manifestUrl;
-      document.head.appendChild(linkTag);
-    })();
-
-    // Service Worker Registrierung für Offline-Support
+    // Service Worker Registrierung für Offline-Support & PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
