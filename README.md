@@ -27,4 +27,6 @@ Da es sich um eine PWA handelt, muss die App nicht über einen App Store herunte
 ## Wichtige Hinweise zur Nutzung
 
 * **Datenverlust bei Cache-Leerung:** Da die App vollständig offline arbeitet, werden laufende Spieltagsdaten im lokalen Speicher (Local Storage) des Browsers abgelegt. Das manuelle Löschen der Browser-Daten löscht auch ungespeicherte Eingaben.
-* **PDF-Sicherung:** Es wird dringend empfohlen, den PDF-Download unmittelbar nach dem Ende des Spieltags durchzuführen, um die finalen Daten dauerhaft und sicher zu dokumentieren.
+* **PDF-Sicherung:** Es wird dringend empfohlen, den PDF-Download unmittelbar nach dem Ende des Spieltags durchzuführen, um die finalen Daten dauerhaft und sicher zu dokumentieren.sh-5.3$ git pull
+Schwerwiegend: Kein Git-Repository (oder irgendein Elternverzeichnis bis zum Einhängepunkt /)
+Stoppe bei Dateisystemgrenze (GIT_DISCOVERY_ACROSS_FILESYSTEM nicht gesetzt).
