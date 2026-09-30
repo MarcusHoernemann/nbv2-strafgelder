@@ -78,11 +78,7 @@
   <!-- Header -->
   <header class="sticky top-0 z-30 bg-board-card/95 backdrop-blur-md border-b border-board-border px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between shadow-lg">
     <div class="flex items-center space-x-2.5 sm:space-x-3">
-      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-red-600 via-amber-500 to-emerald-500 p-0.5 flex items-center justify-center shadow-md">
-        <div class="w-full h-full bg-board-dark rounded-[14px] flex items-center justify-center">
-          <i data-lucide="target" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
-        </div>
-      </div>
+      <img src="logo.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover shrink-0 shadow-md">
       <div>
         <h1 class="text-sm sm:text-base font-black tracking-tight text-white leading-tight">
           NBV STRAFKASSE
@@ -122,7 +118,6 @@
               <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-emerald-400">AM BOARD</span>
             </div>
             <h2 class="text-lg sm:text-2xl font-black text-white tracking-wide truncate" id="active-player-name">Spieler</h2>
-            <p class="text-[10px] text-slate-400 truncate">Tippen bucht sofort – Fenster bleibt offen</p>
           </div>
         </div>
 
@@ -134,12 +129,6 @@
           </div>
 
           <div class="flex items-center gap-1.5 shrink-0">
-            <!-- Next Player Fast Switch -->
-            <button onclick="switchNextPlayer()" class="px-2.5 sm:px-3 py-2 bg-board-dark hover:bg-slate-800 text-slate-200 border border-board-border rounded-xl text-xs font-bold flex items-center gap-1 tap-btn" title="Direkt zum nächsten Spieler springen">
-              <span>Nächster</span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-400"></i>
-            </button>
-
             <!-- Close/Finish Button -->
             <button onclick="closeActiveGameView()" class="px-3 sm:px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 tap-btn shadow-lg">
               <i data-lucide="check" class="w-3.5 h-3.5"></i>
@@ -201,15 +190,15 @@
           </div>
         </button>
 
-        <!-- Mit Anbohlen ausmachen (2,00 €) -->
-        <button onclick="liveBookPenalty(2.00, 'Mit Anbohlen ausgemacht')" class="tap-btn p-2.5 sm:p-3.5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-xl sm:rounded-2xl flex flex-col justify-between text-left shadow-md">
+        <!-- Mit Bull-off ausmachen (2,00 €) -->
+        <button onclick="liveBookPenalty(2.00, 'Mit Bull-off ausgemacht')" class="tap-btn p-2.5 sm:p-3.5 bg-board-card hover:bg-red-950/40 border-2 border-board-border hover:border-red-500/70 rounded-xl sm:rounded-2xl flex flex-col justify-between text-left shadow-md">
           <div class="flex items-center justify-between w-full">
-            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center">🔨</span>
+            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center">🎯</span>
             <span class="font-mono font-black text-xs sm:text-sm text-red-400 bg-red-950/80 px-2 py-0.5 rounded-lg border border-red-800/60">+2,00 €</span>
           </div>
           <div class="mt-2">
-            <div class="font-black text-xs sm:text-sm text-white">Anbohlen aus</div>
-            <div class="text-[10px] text-slate-400">Ausgemacht mit Anbohlen</div>
+            <div class="font-black text-xs sm:text-sm text-white">Bull-off</div>
+            <div class="text-[10px] text-slate-400">Ausgemacht mit Ausbullen</div>
           </div>
         </button>
 
@@ -267,6 +256,7 @@
 
   <!-- MAIN DASHBOARD: SHOWN WHEN NO PLAYER IS ACTIVELY CALLED -->
   <main id="view-dashboard" class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-5 space-y-4">
+    <!-- Stat Cards Header: Inklusive Quick Add Player (Button neben Strafenkönig) -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5">
       
       <!-- Total Pot -->
@@ -305,7 +295,7 @@
         <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1 font-mono" id="stat-king-amount">0,00 €</div>
       </div>
 
-      <!-- Quick Add Player -->
+      <!-- Quick Add Player Button (oben rechts neben Strafenkönig) -->
       <div onclick="openAddPlayerModal()" class="bg-board-card/60 hover:bg-board-card border border-board-border/80 border-dashed rounded-2xl p-3.5 flex flex-col justify-center items-center gap-1 text-center transition cursor-pointer active:scale-95 shadow-md">
         <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
           <i data-lucide="user-plus" class="w-4 h-4"></i>
@@ -314,14 +304,13 @@
       </div>
     </section>
 
-    <!-- Catalog Reference Bar -->
+    <!-- Catalog Reference Bar (ohne '1-Klick beim Wurf') -->
     <section class="bg-board-card border border-board-border rounded-2xl p-3 sm:p-3.5 shadow-sm">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-1.5">
           <i data-lucide="receipt" class="w-3.5 h-3.5 text-red-400"></i>
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Gültiger Strafenkatalog</h2>
         </div>
-        <span class="text-[10px] sm:text-[11px] text-slate-400">1-Klick beim Wurf</span>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 text-xs">
         <div class="bg-board-dark p-2 rounded-xl border border-board-border flex justify-between items-center">
@@ -337,7 +326,7 @@
           <span class="text-red-400 font-bold font-mono">1,00 €</span>
         </div>
         <div class="bg-board-dark p-2 rounded-xl border border-board-border flex justify-between items-center">
-          <span class="text-slate-300">Mit Anbohlen</span>
+          <span class="text-slate-300">Bull-off</span>
           <span class="text-red-400 font-bold font-mono">2,00 €</span>
         </div>
         <div class="bg-board-dark p-2 rounded-xl border border-board-border flex justify-between items-center col-span-2 sm:col-span-1">
@@ -356,17 +345,13 @@
       </div>
     </section>
 
-    <!-- Players Section -->
+    <!-- Players Section (Button 'Spieler hinzufügen' rechts neben der Überschrift entfernt) -->
     <section>
       <div class="flex items-center justify-between mb-2.5">
         <div class="flex items-center gap-2">
           <h2 class="text-sm sm:text-base font-black text-white">Spieler am Spieltag</h2>
           <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono font-bold" id="player-badge-count">0</span>
         </div>
-        <button onclick="openAddPlayerModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-md">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-          Spieler hinzufügen
-        </button>
       </div>
 
       <!-- Player Cards Container -->
@@ -401,13 +386,13 @@
         </button>
       </div>
 
-      <div id="history-list" class="divide-y divide-board-border/70 max-h-48 overflow-y-auto text-xs pr-1">
+      <div id="history-list" class="divide-y border-board-border/70 max-h-48 overflow-y-auto text-xs pr-1">
         <!-- Rendered dynamically -->
       </div>
     </section>
   </main>
 
-  <!-- Modal: Add New Player (Clean: only name, no shirt question) -->
+  <!-- Modal: Add New Player -->
   <div id="add-player-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-board-card border border-board-border rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
       <div class="p-4 sm:p-5 border-b border-board-border flex items-center justify-between">
@@ -578,13 +563,6 @@
       document.getElementById('view-active-game').classList.add('hidden');
       document.getElementById('view-dashboard').classList.remove('hidden');
       renderAll();
-    }
-
-    function switchNextPlayer() {
-      if (appData.players.length === 0) return;
-      const currentIndex = appData.players.findIndex(p => p.id === activePlayerId);
-      const nextIndex = (currentIndex + 1) % appData.players.length;
-      openPlayerGame(appData.players[nextIndex].id);
     }
 
     // 1-TAP RAPID BOOKING (NEVER CLOSES THE SCREEN!)
@@ -1101,7 +1079,7 @@
           ['Unter 36 Punkte werfen', '0,50 €'],
           ['Unter 11 Punkte werfen', '1,00 €'],
           ['Lakritz werfen', '1,00 €'],
-          ['Mit Anbohlen ausmachen', '2,00 €'],
+          ['Mit Bull-off ausmachen', '2,00 €'],
           ['1 Spieler wirft 180, 171 oder 162', 'Alle anderen Spieler zahlen je 1,00 €'],
           ['Ohne Trikot spielen', '2,50 €']
         ],
