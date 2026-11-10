@@ -4,7 +4,7 @@
 =================================================================================================
    ___  ___  _   _    Author:  Marcus Hörnemann
    |  \/  | | | | |   Project: nbv2-strafkasse
-   | .  . | | |_| |   Version: 0.1.0
+   | .  . | | |_| |   Version: 0.1.2
    | |\/| | |  _  |   Date:    2026
    |_|  |_/ |_| |_/   License: CC BY-NC-SA 4.0
 =================================================================================================
@@ -94,6 +94,30 @@
 </head>
 <body class="bg-board-dark text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-red-500 selection:text-white">
 
+  <!-- Update Available Banner -->
+  <div id="update-banner" class="hidden sticky top-0 z-50 bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 border-b border-emerald-400/50 px-3.5 py-2.5 shadow-2xl">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0 text-emerald-300">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs sm:text-sm font-black text-white leading-tight">Update verfügbar!</p>
+          <p class="text-[10px] sm:text-xs text-emerald-200 truncate">Eine neue Version der NBV Strafkasse ist bereit.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button onclick="applyAppUpdate()" class="px-3 py-1.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md tap-btn">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Jetzt aktualisieren</span>
+        </button>
+        <button onclick="dismissUpdateBanner()" class="p-1.5 text-emerald-200 hover:text-white rounded-lg" title="Später">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="sticky top-0 z-30 bg-board-card/95 backdrop-blur-md border-b border-board-border px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between shadow-lg">
     <div class="flex items-center space-x-2.5 sm:space-x-3">
@@ -113,8 +137,9 @@
         <span class="hidden sm:inline">PDF Export</span>
       </button>
 
-      <button onclick="openSettingsModal()" class="p-2 bg-board-border/70 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-xl transition" title="Optionen & Reset">
+      <button onclick="openSettingsModal()" class="relative p-2 bg-board-border/70 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-xl transition" title="Optionen & Reset">
         <i data-lucide="settings" class="w-4 h-4"></i>
+        <span id="settings-update-dot" class="hidden absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-board-card"></span>
       </button>
     </div>
   </header>
@@ -246,7 +271,7 @@
         </div>
       </div>
 
-      <!-- 180 / 171 / 162 Button: Sachliches Design ohne Puls/Glow-Effekt -->
+      <!-- 180 / 171 / 162 Button -->
       <button onclick="liveTrigger180ForActivePlayer()" class="tap-btn w-full p-2.5 sm:p-3 bg-board-card hover:bg-amber-950/30 border-2 border-amber-500/60 rounded-xl sm:rounded-2xl flex items-center justify-between gap-2 text-white shadow-md text-left">
         <div class="flex items-center gap-2 min-w-0">
           <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
@@ -275,8 +300,8 @@
 
   <!-- MAIN DASHBOARD: SHOWN WHEN NO PLAYER IS ACTIVELY CALLED -->
   <main id="view-dashboard" class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-5 space-y-4">
-    <!-- Stat Cards Header: Inklusive Quick Add Player (Button neben Strafenkönig) -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5">
+    <!-- Stat Cards Header: 5 Kacheln inklusive Strafgeld-Durchschnitt -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
       
       <!-- Total Pot -->
       <div class="bg-board-card border border-board-border rounded-2xl p-3.5 flex flex-col justify-between shadow-md">
@@ -288,6 +313,18 @@
           <span class="text-xl sm:text-2xl font-black text-amber-400 font-mono" id="stat-total-pot">0,00 €</span>
         </div>
         <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1" id="stat-total-count">0 Strafen verbucht</div>
+      </div>
+
+      <!-- Average Penalty (nur Spieler mit Strafen) -->
+      <div class="bg-board-card border border-board-border rounded-2xl p-3.5 flex flex-col justify-between shadow-md">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider">
+          <span>Ø Strafe</span>
+          <i data-lucide="calculator" class="w-4 h-4 text-purple-400"></i>
+        </div>
+        <div class="mt-1.5">
+          <span class="text-xl sm:text-2xl font-black text-purple-400 font-mono" id="stat-avg-penalty">0,00 €</span>
+        </div>
+        <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1" id="stat-avg-subtitle">0 Spieler betroffen</div>
       </div>
 
       <!-- Active Players -->
@@ -314,8 +351,8 @@
         <div class="text-[10px] sm:text-[11px] text-slate-400 mt-1 font-mono" id="stat-king-amount">0,00 €</div>
       </div>
 
-      <!-- Quick Add Player Button (oben rechts neben Strafenkönig) -->
-      <div onclick="openAddPlayerModal()" class="bg-board-card/60 hover:bg-board-card border border-board-border/80 border-dashed rounded-2xl p-3.5 flex flex-col justify-center items-center gap-1 text-center transition cursor-pointer active:scale-95 shadow-md">
+      <!-- Quick Add Player Button -->
+      <div onclick="openAddPlayerModal()" class="col-span-2 sm:col-span-1 bg-board-card/60 hover:bg-board-card border border-board-border/80 border-dashed rounded-2xl p-3.5 flex flex-col justify-center items-center gap-1 text-center transition cursor-pointer active:scale-95 shadow-md">
         <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
           <i data-lucide="user-plus" class="w-4 h-4"></i>
         </div>
@@ -323,7 +360,7 @@
       </div>
     </section>
 
-    <!-- Catalog Reference Bar (ohne '1-Klick beim Wurf') -->
+    <!-- Catalog Reference Bar -->
     <section class="bg-board-card border border-board-border rounded-2xl p-3 sm:p-3.5 shadow-sm">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-1.5">
@@ -364,7 +401,7 @@
       </div>
     </section>
 
-    <!-- Players Section (Button 'Spieler hinzufügen' rechts neben der Überschrift entfernt) -->
+    <!-- Players Section -->
     <section>
       <div class="flex items-center justify-between mb-2.5">
         <div class="flex items-center gap-2">
@@ -461,6 +498,24 @@
           <input type="text" id="session-title-input" class="w-full bg-board-dark border border-board-border rounded-xl px-3 py-2 text-sm text-white" placeholder="z. B. Dartabend / Ligaspiel">
         </div>
 
+        <!-- App Update Section -->
+        <div class="pt-2 border-t border-board-border space-y-2">
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span>App-Version</span>
+            <span class="font-mono font-bold text-slate-300">0.1.2</span>
+          </div>
+
+          <button id="btn-check-update" onclick="checkForAppUpdates()" class="w-full py-2.5 px-3.5 bg-board-dark hover:bg-slate-800 border border-board-border text-sky-400 rounded-xl font-medium flex items-center justify-between transition">
+            <span id="btn-check-update-text">Nach App-Update suchen</span>
+            <i data-lucide="refresh-cw" id="btn-check-update-icon" class="w-4 h-4"></i>
+          </button>
+
+          <button id="btn-install-update-modal" onclick="applyAppUpdate()" class="hidden w-full py-2.5 px-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center justify-between transition shadow-md">
+            <span>Neues Update jetzt installieren</span>
+            <i data-lucide="download" class="w-4 h-4"></i>
+          </button>
+        </div>
+
         <div class="pt-2 border-t border-board-border space-y-2">
           <!-- Neuer Spieltag: Strafen auf 0, Spieler bleiben erhalten -->
           <button onclick="resetAllFinesOnly()" class="w-full py-2.5 px-3.5 bg-board-dark hover:bg-slate-800 border border-board-border text-amber-400 rounded-xl font-medium flex items-center justify-between transition">
@@ -493,6 +548,7 @@
   </div>
 
   <script>
+    const APP_VERSION = '0.1.2';
     const APP_STORAGE_KEY = 'dart_strafenkasse_live_v4';
 
     let appData = {
@@ -503,6 +559,9 @@
     };
 
     let activePlayerId = null;
+    let swRegistration = null;
+    let waitingWorker = null;
+    let isRefreshing = false;
 
     function loadData() {
       const stored = localStorage.getItem(APP_STORAGE_KEY);
@@ -552,7 +611,7 @@
       setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
         toast.classList.add('translate-y-20', 'opacity-0');
-      }, 2000);
+      }, 2400);
     }
 
     // OPENS THE DEDICATED LIVE SCORING SCREEN (STAYS OPEN PERMANENTLY)
@@ -562,14 +621,12 @@
 
       activePlayerId = playerId;
 
-      // Update active view UI
       document.getElementById('active-player-name').innerText = player.name;
       document.getElementById('active-player-initial').innerText = player.name.charAt(0).toUpperCase();
       document.getElementById('active-player-total').innerText = player.total.toFixed(2).replace('.', ',') + ' €';
 
       renderActivePlayerHistory();
 
-      // Show Live Game view, Hide Dashboard
       document.getElementById('view-dashboard').classList.add('hidden');
       document.getElementById('view-active-game').classList.remove('hidden');
 
@@ -584,7 +641,6 @@
       renderAll();
     }
 
-    // 1-TAP RAPID BOOKING (NEVER CLOSES THE SCREEN!)
     function liveBookPenalty(amount, reason) {
       if (!activePlayerId) return;
       const player = appData.players.find(p => p.id === activePlayerId);
@@ -603,7 +659,6 @@
       player.total = parseFloat((player.total + amount).toFixed(2));
       player.paid = false;
 
-      // Add to session history
       if (!appData.history) appData.history = [];
       const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
       appData.history.push({
@@ -616,7 +671,6 @@
 
       saveData();
 
-      // Update live numbers directly on screen without leaving
       document.getElementById('active-player-total').innerText = player.total.toFixed(2).replace('.', ',') + ' €';
       renderActivePlayerHistory();
       showToast(`+${amount.toFixed(2).replace('.', ',')} € gebucht`);
@@ -676,7 +730,6 @@
 
       const penaltyAmount = 1.00;
       const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      let otherCount = 0;
 
       appData.players.forEach(p => {
         if (p.id !== scorer.id) {
@@ -689,7 +742,6 @@
           });
           p.total = parseFloat((p.total + penaltyAmount).toFixed(2));
           p.paid = false;
-          otherCount++;
 
           appData.history.push({
             playerId: p.id,
@@ -738,29 +790,52 @@
       lucide.createIcons();
     }
 
-    function renderStats() {
+    function calculatePenaltyStats() {
       let totalPot = 0;
       let totalPenaltiesCount = 0;
       let paidCount = 0;
       let maxPayer = { name: '-', amount: 0 };
+      let playersWithPenaltiesCount = 0;
 
       appData.players.forEach(p => {
         totalPot += p.total;
         totalPenaltiesCount += (p.penalties ? p.penalties.length : 0);
         if (p.paid) paidCount++;
+        if (p.total > 0) {
+          playersWithPenaltiesCount++;
+        }
         if (p.total > maxPayer.amount) {
           maxPayer = { name: p.name, amount: p.total };
         }
       });
 
-      document.getElementById('stat-total-pot').innerText = totalPot.toFixed(2).replace('.', ',') + ' €';
-      document.getElementById('stat-total-count').innerText = `${totalPenaltiesCount} Strafen gebucht`;
+      const avgPenalty = playersWithPenaltiesCount > 0 ? (totalPot / playersWithPenaltiesCount) : 0;
+
+      return {
+        totalPot,
+        totalPenaltiesCount,
+        paidCount,
+        maxPayer,
+        playersWithPenaltiesCount,
+        avgPenalty
+      };
+    }
+
+    function renderStats() {
+      const stats = calculatePenaltyStats();
+
+      document.getElementById('stat-total-pot').innerText = stats.totalPot.toFixed(2).replace('.', ',') + ' €';
+      document.getElementById('stat-total-count').innerText = `${stats.totalPenaltiesCount} Strafen gebucht`;
+      
+      document.getElementById('stat-avg-penalty').innerText = stats.avgPenalty.toFixed(2).replace('.', ',') + ' €';
+      document.getElementById('stat-avg-subtitle').innerText = `${stats.playersWithPenaltiesCount} Spieler mit Strafe`;
+
       document.getElementById('stat-player-count').innerText = appData.players.length;
-      document.getElementById('stat-paid-count').innerText = `${paidCount} von ${appData.players.length} bezahlt`;
+      document.getElementById('stat-paid-count').innerText = `${stats.paidCount} von ${appData.players.length} bezahlt`;
       document.getElementById('player-badge-count').innerText = appData.players.length;
 
-      document.getElementById('stat-king-name').innerText = maxPayer.amount > 0 ? maxPayer.name : '-';
-      document.getElementById('stat-king-amount').innerText = maxPayer.amount > 0 ? maxPayer.amount.toFixed(2).replace('.', ',') + ' €' : '0,00 €';
+      document.getElementById('stat-king-name').innerText = stats.maxPayer.amount > 0 ? stats.maxPayer.name : '-';
+      document.getElementById('stat-king-amount').innerText = stats.maxPayer.amount > 0 ? stats.maxPayer.amount.toFixed(2).replace('.', ',') + ' €' : '0,00 €';
     }
 
     function renderPlayers() {
@@ -813,7 +888,6 @@
 
           <!-- Actions -->
           <div class="mt-3 pt-2.5 border-t border-board-border flex items-center gap-2">
-            <!-- BIG CALL TO BOARD BUTTON: OPENS DEDICATED LIVE SCORING SCREEN -->
             <button onclick="openPlayerGame('${player.id}')" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 active:scale-95 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition shadow-md tap-btn">
               <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
               Spieler aufrufen
@@ -876,7 +950,6 @@
       closeModal('add-player-modal');
       showToast(`Spieler "${name}" angelegt!`);
 
-      // Immediately open live screen for this player
       openPlayerGame(newId);
     }
 
@@ -988,36 +1061,39 @@
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const today = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
       const sessionTitle = appData.sessionTitle || 'Dart Spieltag Abrechnung';
+      const stats = calculatePenaltyStats();
 
       // Header Banner
       doc.setFillColor(17, 24, 39);
-      doc.rect(0, 0, 210, 42, 'F');
+      doc.rect(0, 0, 210, 44, 'F');
 
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(22);
-      doc.text("NBV STRAFKASSE", 14, 20);
+      doc.text("NBV STRAFKASSE", 14, 19);
 
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(203, 213, 225);
-      doc.text(`${sessionTitle} | Datum: ${today}`, 14, 28);
+      doc.text(`${sessionTitle} | Datum: ${today}`, 14, 27);
 
-      let totalSum = 0;
       let openSum = 0;
       appData.players.forEach(p => {
-        totalSum += p.total;
         if (!p.paid) openSum += p.total;
       });
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
+      doc.setFontSize(12);
       doc.setTextColor(245, 158, 11);
-      doc.text(`Gesamttopf: ${totalSum.toFixed(2).replace('.', ',')} EUR`, 130, 20);
+      doc.text(`Gesamttopf: ${stats.totalPot.toFixed(2).replace('.', ',')} EUR`, 130, 17);
 
       doc.setFontSize(10);
       doc.setTextColor(239, 68, 68);
-      doc.text(`Noch offen: ${openSum.toFixed(2).replace('.', ',')} EUR`, 130, 27);
+      doc.text(`Noch offen: ${openSum.toFixed(2).replace('.', ',')} EUR`, 130, 24);
+
+      doc.setFontSize(10);
+      doc.setTextColor(192, 132, 252);
+      doc.text(`Durchschnitt (${stats.playersWithPenaltiesCount} Sp.): ${stats.avgPenalty.toFixed(2).replace('.', ',')} EUR`, 130, 31);
 
       // Section 1: Overview Table
       const tableRows = appData.players.map((p, idx) => [
@@ -1029,7 +1105,7 @@
       ]);
 
       doc.autoTable({
-        startY: 50,
+        startY: 52,
         head: [['#', 'Spieler', 'Anzahl Strafen', 'Status', 'Gesamtbetrag']],
         body: tableRows,
         theme: 'striped',
@@ -1125,12 +1201,106 @@
       showToast(`PDF gespeichert!`);
     }
 
-    // Service Worker Registrierung für Offline-Support & PWA
+    // =========================================================================
+    // PWA UPDATE MANAGEMENT
+    // =========================================================================
+    function showUpdateUI(worker) {
+      waitingWorker = worker;
+      document.getElementById('update-banner').classList.remove('hidden');
+      document.getElementById('settings-update-dot').classList.remove('hidden');
+      document.getElementById('btn-install-update-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function dismissUpdateBanner() {
+      document.getElementById('update-banner').classList.add('hidden');
+    }
+
+    function applyAppUpdate() {
+      if (waitingWorker) {
+        waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      } else {
+        window.location.reload();
+      }
+    }
+
+    async function checkForAppUpdates() {
+      if (!navigator.onLine) {
+        showToast('Offline – keine Update-Prüfung möglich.', true);
+        return;
+      }
+
+      if (!swRegistration) {
+        showToast('Service Worker nicht aktiv.', true);
+        return;
+      }
+
+      const btnText = document.getElementById('btn-check-update-text');
+      const btnIcon = document.getElementById('btn-check-update-icon');
+      btnText.innerText = 'Suche nach Updates...';
+      btnIcon.classList.add('animate-spin');
+
+      try {
+        await swRegistration.update();
+
+        setTimeout(() => {
+          btnIcon.classList.remove('animate-spin');
+          btnText.innerText = 'Nach App-Update suchen';
+
+          if (swRegistration.waiting) {
+            showUpdateUI(swRegistration.waiting);
+            showToast('Neues Update gefunden!');
+          } else if (swRegistration.installing) {
+            showToast('Update wird heruntergeladen...');
+          } else {
+            showToast('App ist auf dem neuesten Stand.');
+          }
+        }, 1200);
+      } catch (err) {
+        btnIcon.classList.remove('animate-spin');
+        btnText.innerText = 'Nach App-Update suchen';
+        showToast('Update-Prüfung fehlgeschlagen.', true);
+      }
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Service Worker erfolgreich registriert'))
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+          .then(reg => {
+            swRegistration = reg;
+
+            // Falls bereits ein Update bereitsteht
+            if (reg.waiting) {
+              showUpdateUI(reg.waiting);
+            }
+
+            // Neues Update wird gefunden & installiert
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              if (!newWorker) return;
+
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  showUpdateUI(newWorker);
+                }
+              });
+            });
+
+            // Bei Rückkehr in die App (z. B. nach GitHub-Push) automatisch prüfen
+            document.addEventListener('visibilitychange', () => {
+              if (document.visibilityState === 'visible' && navigator.onLine && swRegistration) {
+                swRegistration.update().catch(() => {});
+              }
+            });
+          })
           .catch(err => console.error('Service Worker Fehler:', err));
+
+        // Automatischer Reload, sobald der neue Service Worker übernimmt
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (isRefreshing) return;
+          isRefreshing = true;
+          window.location.reload();
+        });
       });
     }
 
